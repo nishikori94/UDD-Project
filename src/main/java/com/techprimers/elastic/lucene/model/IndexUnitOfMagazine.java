@@ -30,6 +30,16 @@ public class IndexUnitOfMagazine {
 
 	@Field(type = FieldType.String, index = FieldIndex.analyzed, store = true)
 	private String author;
+	
+    private String highlight;
+
+    public String getHighlight() {
+        return highlight;
+    }
+
+    public void setHighlight(String highlight) {
+        this.highlight = highlight;
+    }
 
 	public IndexUnitOfMagazine() {
 		super();

@@ -9,14 +9,19 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +50,27 @@ public class MagazineController {
 	@Autowired
 	private ScientificAreaService scService;
 
+	
+	@PostMapping(path = "/download", produces = "application/json")
+	public @ResponseBody ResponseEntity<byte[]> download(@RequestBody String location) throws IOException {
+		Path path = Paths.get(location);
+		File downloadFile = new File(location);
+
+		byte[] content = Files.readAllBytes(path);
+
+		HttpHeaders headers = new HttpHeaders();
+
+		// set header fields
+		headers.setContentType(MediaType.parseMediaType("application/pdf"));
+		headers.setContentLength((int) downloadFile.length());
+
+		// disposition = attachment - for download
+		headers.setContentDispositionFormData("attachment; filename=\"%s\"",
+				location);
+		headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+		return new ResponseEntity<>(content, headers, HttpStatus.OK);
+	}
+	
 	@GetMapping
 	public ResponseEntity<Collection<Magazine>> getMagazines() {
 
@@ -109,7 +135,6 @@ public class MagazineController {
 	}
 
 	private void indexUploadedFile(Magazine newMag, MultipartFile file) throws IOException {
-        System.out.println("Pokusaooooooo");
 		if (file.isEmpty()) {
 			System.err.println("fajl je prazan");
 			return; // next please
@@ -125,9 +150,7 @@ public class MagazineController {
 		
         
 		if (fileName != null) {
-			System.out.println("Usaoooooooooooooooooooo");
 			IndexUnitOfMagazine indexUnit = indexer.getHandler(fileName).getIndexUnit(new File(fileName));
-            System.out.println("Nije stigaoooooooo");
 			indexUnit.setAuthor(newMag.getAuthor());
 			indexUnit.setKeyWords(newMag.getKeyWords());
 			indexUnit.setScName(newMag.getScientificArea().getName() + " " + newMag.getScientificArea().getYear());
@@ -142,23 +165,16 @@ public class MagazineController {
 	}
 
 	private String saveUploadedFile(MultipartFile file) throws IOException {
-		System.out.println("I ovde usaooooooo");
 		ClassLoader classLoader = getClass().getClassLoader();
 		File filePath = new File(classLoader.getResource("application.properties").getFile());
-        System.out.println("____d");
 		String retVal = null;
 		if (!file.isEmpty()) {
-			System.out.println("Prolaziiiiisiii");
 			byte[] bytes = file.getBytes();
-			System.out.println("2");
 			Path path = Paths.get(filePath.getAbsolutePath().replace("application.properties", "files/")
 					+ file.getOriginalFilename());
 			Files.write(path, bytes);
-			System.out.println("3");
 			retVal = path.toString();
-			System.out.println("4");
 		}
-		System.out.println("prosao i ovde");
 		return retVal;
 	}
 

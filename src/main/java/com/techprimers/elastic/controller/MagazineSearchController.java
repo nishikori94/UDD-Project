@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.techprimers.elastic.lucene.filters.CyrillicLatinConverter;
 import com.techprimers.elastic.lucene.search.QueryBuilder;
 import com.techprimers.elastic.lucene.search.ResultRetriever;
+import com.techprimers.elastic.model.RequiredHighlight;
 import com.techprimers.elastic.model.ResultData;
 import com.techprimers.elastic.model.SearchType;
 import com.techprimers.elastic.model.SimpleQuery;
@@ -35,7 +36,9 @@ public class MagazineSearchController {
 		public ResponseEntity<List<ResultData>> searchTermQuery(@RequestBody SimpleQuery simpleQuery) throws Exception {	
 			System.err.println("kotroler: "+simpleQuery.getField()+" "+simpleQuery.getValue());
 			org.elasticsearch.index.query.QueryBuilder query= QueryBuilder.buildQuery(SearchType.regular, simpleQuery.getField(), obradi(simpleQuery.getValue())/*simpleQuery.getValue()*/);
-			List<ResultData> results = resultRetriever.getResults(query);			
+			RequiredHighlight rh = new RequiredHighlight(simpleQuery.getField(), simpleQuery.getValue());
+			List<ResultData> results = resultRetriever.getResults(query, rh);	
+			
 			return new ResponseEntity<List<ResultData>>(results, HttpStatus.OK);
 		}
 		
@@ -69,7 +72,8 @@ public class MagazineSearchController {
 		@PostMapping(value="/search/phrase", consumes="application/json")
 		public ResponseEntity<List<ResultData>> searchPhrase(@RequestBody SimpleQuery simpleQuery) throws Exception {
 			org.elasticsearch.index.query.QueryBuilder query= QueryBuilder.buildQuery(SearchType.phrase, simpleQuery.getField(), simpleQuery.getValue());
-			List<ResultData> results = resultRetriever.getResults(query);			
+			RequiredHighlight rh = new RequiredHighlight(simpleQuery.getField(), simpleQuery.getValue());
+			List<ResultData> results = resultRetriever.getResults(query, rh);		
 			return new ResponseEntity<List<ResultData>>(results, HttpStatus.OK);
 		}
 		

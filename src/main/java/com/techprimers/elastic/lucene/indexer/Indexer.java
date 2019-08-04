@@ -89,7 +89,6 @@ public class Indexer {
 		if (fileName.endsWith(".txt")) {
 			return new TextDocHandler();
 		} else if (fileName.endsWith(".pdf")) {
-			System.out.println("????");
 			return new PDFHandler();
 		} else if (fileName.endsWith(".doc")) {
 			return new WordHandler();

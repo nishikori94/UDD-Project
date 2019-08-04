@@ -19,17 +19,13 @@ public class PDFHandler extends DocumentHandler {
 
 	@Override
 	public IndexUnitOfMagazine getIndexUnit(File file) {
-		System.out.println("!!!!");
 		IndexUnitOfMagazine retVal = new IndexUnitOfMagazine();
 		try {
-			System.out.println("Ajdeeeee");
 			org.apache.pdfbox.io.RandomAccessFile raf = new org.apache.pdfbox.io.RandomAccessFile(file,"r");
 			PDFParser parser = new PDFParser(raf);
-			System.out.println("Ovdee");
 			parser.parse();
 			String text = getText(parser);
 			String txt=CyrillicLatinConverter.cir2lat(text);
-			System.out.println("Latinica\n "+text);
 			retVal.setText(txt);
 
 			// metadata extraction
